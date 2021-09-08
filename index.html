@@ -122,6 +122,7 @@
             prepareGameOfLife();
             startdiv.style.display = "none";
             playingdiv.style.display = "block";
+            startRecording();
             gameOfLife.start(100, -1);
         }
 
@@ -150,6 +151,8 @@
     </div>
     <div id="playingdiv" style="display:none;">
         <button id="goButton" class="ui button" onclick="location.reload();">Restart!</button>
+        <button id="replayButton" style="display:none;" class="ui button"><a id="replayButtonLink">Download Replay
+            Video</a></button>
     </div>
     <br>
     <div class="ui container">
@@ -199,5 +202,29 @@
         </div>
     </div>
 </div>
+<script>
+    canvas = document.getElementById('gameOfLifeWorld');
+    var x = 0;
+    let blob;
+
+    function startRecording() {
+        const chunks = []; // here we will store our recorded media chunks (Blobs)
+        const stream = canvas.captureStream(); // grab our canvas MediaStream
+        const rec = new MediaRecorder(stream); // init the recorder
+        // every time the recorder has new data, we will store it in our array
+        rec.ondataavailable = e => chunks.push(e.data);
+        // only when the recorder stops, we construct a complete Blob from all the chunks
+        rec.onstop = e => {
+            blob = new Blob(chunks, {type: 'video/webm'});
+            let a = document.querySelector("#replayButtonLink");
+            a.href = URL.createObjectURL(blob);
+            a.download = "openpalette_replay.webm";
+            let button = document.querySelector("#replayButton");
+            button.style.display = "inline-block";
+        };
+
+        rec.start();
+        setTimeout(() => rec.stop(), 7500);
+    }</script>
 </body>
 </html>
